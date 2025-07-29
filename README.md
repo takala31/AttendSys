@@ -35,6 +35,8 @@ A comprehensive web-based employee attendance tracking application built with No
 
 ## 📦 Installation
 
+> **⚠️ Important:** This is a Node.js web application that requires a server to run. GitHub only hosts the source code - to use the application, you need to run it locally or deploy it to a hosting service.
+
 ### Prerequisites
 - Node.js (v14 or higher)
 - npm (comes with Node.js)
