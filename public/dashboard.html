@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AttendSys - Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-user-clock"></i>
+                <h2>AttendSys</h2>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="nav-item" data-section="attendance">
+                    <i class="fas fa-clock"></i>
+                    <span>Attendance</span>
+                </li>
+                <li class="nav-item" data-section="calendar">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Calendar</span>
+                </li>
+                <li class="nav-item" data-section="leaves">
+                    <i class="fas fa-plane-departure"></i>
+                    <span>Leaves</span>
+                </li>
+                <li class="nav-item admin-only" data-section="users" style="display: none;">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </li>
+                <li class="nav-item admin-only" data-section="reports" style="display: none;">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Reports</span>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <div class="user-details">
+                        <span class="username" id="currentUsername">Loading...</span>
+                        <span class="role" id="currentRole">Loading...</span>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="header-actions">
+                    <div class="current-time" id="currentTime"></div>
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="todayStatus">Not Checked In</h3>
+                            <p>Today's Status</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="monthlyAttendance">0</h3>
+                            <p>Days This Month</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-plane-departure"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="pendingLeaves">0</h3>
+                            <p>Pending Leaves</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalHours">0</h3>
+                            <p>Hours This Week</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Quick Actions</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="quick-actions">
+                                <button class="action-btn check-in" onclick="checkIn()" id="checkInBtn">
+                                    <i class="fas fa-play"></i>
+                                    <span>Check In</span>
+                                </button>
+                                <button class="action-btn check-out" onclick="checkOut()" id="checkOutBtn" disabled>
+                                    <i class="fas fa-stop"></i>
+                                    <span>Check Out</span>
+                                </button>
+                                <button class="action-btn request-leave" onclick="showSection('leaves')">
+                                    <i class="fas fa-plane-departure"></i>
+                                    <span>Request Leave</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="activity-list" id="recentActivity">
+                                <div class="activity-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Loading recent activity...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Attendance Section -->
+            <section id="attendanceSection" class="content-section">
+                <div class="section-header">
+                    <h2>Attendance Records</h2>
+                    <div class="section-actions">
+                        <input type="date" id="attendanceStartDate" class="date-input">
+                        <input type="date" id="attendanceEndDate" class="date-input">
+                        <button class="btn btn-primary" onclick="loadAttendanceRecords()">
+                            <i class="fas fa-search"></i> Filter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Total Hours</th>
+                                <th>Status</th>
+                                <th class="admin-only" style="display: none;">Employee</th>
+                                <th class="admin-only" style="display: none;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center">Loading attendance records...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Calendar Section -->
+            <section id="calendarSection" class="content-section">
+                <div class="section-header">
+                    <h2>Calendar</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" onclick="previousMonth()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="currentMonth">Loading...</span>
+                        <button class="btn btn-secondary" onclick="nextMonth()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="btn btn-primary admin-only" onclick="showAddEventModal()" style="display: none;">
+                            <i class="fas fa-plus"></i> Add Event
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="calendar-container">
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <span class="legend-color working-day"></span>
+                        <span>Working Day</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color weekend"></span>
+                        <span>Weekend</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color holiday"></span>
+                        <span>Holiday</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color present"></span>
+                        <span>Present</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color absent"></span>
+                        <span>Absent</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leaves Section -->
+            <section id="leavesSection" class="content-section">
+                <div class="section-header">
+                    <h2>Leave Management</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" onclick="showLeaveRequestModal()">
+                            <i class="fas fa-plus"></i> Request Leave
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="leaves-grid">
+                    <div class="leaves-summary">
+                        <h3>Leave Balance</h3>
+                        <div id="leaveBalance">
+                            <div class="balance-item">
+                                <span>Annual Leave</span>
+                                <span>Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="leaves-list">
+                        <h3>Leave Requests</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Days</th>
+                                        <th>Status</th>
+                                        <th class="admin-only" style="display: none;">Employee</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leavesTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center">Loading leave requests...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section (Admin Only) -->
+            <section id="usersSection" class="content-section admin-only" style="display: none;">
+                <div class="section-header">
+                    <h2>User Management</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" onclick="showAddUserModal()">
+                            <i class="fas fa-plus"></i> Add User
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center">Loading users...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reports Section (Admin Only) -->
+            <section id="reportsSection" class="content-section admin-only" style="display: none;">
+                <div class="section-header">
+                    <h2>Reports & Analytics</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" onclick="refreshReportStats()">
+                            <i class="fas fa-sync"></i> Refresh Stats
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Report Statistics -->
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Attendance Summary</h3>
+                        <div class="report-stats" id="attendanceStats">
+                            <div class="stat">
+                                <span>Total Employees:</span>
+                                <span id="totalEmployees">0</span>
+                            </div>
+                            <div class="stat">
+                                <span>Present Today:</span>
+                                <span id="presentToday">0</span>
+                            </div>
+                            <div class="stat">
+                                <span>Absent Today:</span>
+                                <span id="absentToday">0</span>
+                            </div>
+                            <div class="stat">
+                                <span>Average Hours/Day:</span>
+                                <span id="avgHoursPerDay">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <h3>Leave Summary</h3>
+                        <div class="report-stats" id="leaveStats">
+                            <div class="stat">
+                                <span>Pending Requests:</span>
+                                <span id="pendingRequests">0</span>
+                            </div>
+                            <div class="stat">
+                                <span>Approved This Month:</span>
+                                <span id="approvedThisMonth">0</span>
+                            </div>
+                            <div class="stat">
+                                <span>Total Leave Days:</span>
+                                <span id="totalLeaveDays">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <h3>Monthly Overview</h3>
+                        <div class="report-stats" id="monthlyStats">
+                            <div class="stat">
+                                <span>Working Days:</span>
+                                <span id="workingDays">0</span>
+                            </div>
+                            <div class="stat">
+                                <span>Total Hours:</span>
+                                <span id="totalHours">0</span>
+                            </div>
+                            <div class="stat">
+                                <span>Overtime Hours:</span>
+                                <span id="overtimeHours">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Generation Section -->
+                <div class="report-generation">
+                    <div class="section-header">
+                        <h3>Generate Reports</h3>
+                    </div>
+                    
+                    <div class="report-filters">
+                        <div class="filter-row">
+                            <div class="form-group">
+                                <label for="reportType">Report Type</label>
+                                <select id="reportType" onchange="updateReportOptions()">
+                                    <option value="attendance">Attendance Report</option>
+                                    <option value="employee">Employee Report</option>
+                                    <option value="leaves">Leave Report</option>
+                                    <option value="summary">Summary Report</option>
+                                    <option value="timesheet">Timesheet Report</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reportPeriod">Period</label>
+                                <select id="reportPeriod" onchange="updateDateRange()">
+                                    <option value="today">Today</option>
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                    <option value="quarter">This Quarter</option>
+                                    <option value="year">This Year</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-row" id="customDateRange" style="display: none;">
+                            <div class="form-group">
+                                <label for="reportStartDate">Start Date</label>
+                                <input type="date" id="reportStartDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="reportEndDate">End Date</label>
+                                <input type="date" id="reportEndDate">
+                            </div>
+                        </div>
+                        
+                        <div class="filter-row" id="employeeFilter" style="display: none;">
+                            <div class="form-group">
+                                <label for="reportEmployee">Employee (Optional)</label>
+                                <select id="reportEmployee">
+                                    <option value="">All Employees</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="reportDepartment">Department (Optional)</label>
+                                <select id="reportDepartment">
+                                    <option value="">All Departments</option>
+                                    <option value="IT">IT</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Sales">Sales</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Finance">Finance</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-actions">
+                        <button class="btn btn-primary" onclick="generateReport('pdf')">
+                            <i class="fas fa-file-pdf"></i> Generate PDF
+                        </button>
+                        <button class="btn btn-success" onclick="generateReport('excel')">
+                            <i class="fas fa-file-excel"></i> Generate Excel
+                        </button>
+                        <button class="btn btn-info" onclick="previewReport()">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Report Preview Section -->
+                <div id="reportPreview" class="report-preview" style="display: none;">
+                    <div class="section-header">
+                        <h3>Report Preview</h3>
+                        <button class="btn btn-secondary" onclick="closeReportPreview()">
+                            <i class="fas fa-times"></i> Close Preview
+                        </button>
+                    </div>
+                    <div id="reportPreviewContent" class="report-content">
+                        <!-- Preview content will be loaded here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="leaveRequestModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Request Leave</h3>
+                <button class="modal-close" onclick="closeModal('leaveRequestModal')">&times;</button>
+            </div>
+            <form id="leaveRequestForm">
+                <div class="form-group">
+                    <label for="leaveType">Leave Type</label>
+                    <select id="leaveType" name="leave_type" required>
+                        <option value="">Select leave type</option>
+                        <option value="sick">Sick Leave</option>
+                        <option value="vacation">Vacation</option>
+                        <option value="personal">Personal Leave</option>
+                        <option value="emergency">Emergency Leave</option>
+                        <option value="maternity">Maternity Leave</option>
+                        <option value="paternity">Paternity Leave</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" name="start_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" name="end_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="leaveReason">Reason</label>
+                    <textarea id="leaveReason" name="reason" rows="3" placeholder="Enter reason for leave"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('leaveRequestModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New User</h3>
+                <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <form id="addUserForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employeeId">Employee ID</label>
+                        <input type="text" id="employeeId" name="employee_id" required placeholder="EMP001">
+                    </div>
+                    <div class="form-group">
+                        <label for="newUsername">Username</label>
+                        <input type="text" id="newUsername" name="username" required placeholder="john.doe">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newEmail">Email</label>
+                    <input type="email" id="newEmail" name="email" required placeholder="john.doe@company.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newPassword">Password</label>
+                    <input type="password" id="newPassword" name="password" required placeholder="Minimum 6 characters">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="first_name" required placeholder="John">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="last_name" required placeholder="Doe">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userRole">Role</label>
+                        <select id="userRole" name="role" required>
+                            <option value="employee">Employee</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <input type="text" id="department" name="department" placeholder="Sales, IT, HR, etc.">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="position">Position</label>
+                        <input type="text" id="position" name="position" placeholder="Manager, Developer, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label for="hireDate">Hire Date</label>
+                        <input type="date" id="hireDate" name="hire_date">
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addUserModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit User</h3>
+                <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId" name="id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editEmployeeId">Employee ID</label>
+                        <input type="text" id="editEmployeeId" name="employee_id" required placeholder="EMP001">
+                    </div>
+                    <div class="form-group">
+                        <label for="editUsername">Username</label>
+                        <input type="text" id="editUsername" name="username" required placeholder="john.doe">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" name="email" required placeholder="john.doe@company.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPassword">Password</label>
+                    <input type="password" id="editPassword" name="password" placeholder="Leave blank to keep current password">
+                    <small class="form-help">Leave blank to keep current password</small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editFirstName">First Name</label>
+                        <input type="text" id="editFirstName" name="first_name" required placeholder="John">
+                    </div>
+                    <div class="form-group">
+                        <label for="editLastName">Last Name</label>
+                        <input type="text" id="editLastName" name="last_name" required placeholder="Doe">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editUserRole">Role</label>
+                        <select id="editUserRole" name="role" required>
+                            <option value="employee">Employee</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDepartment">Department</label>
+                        <input type="text" id="editDepartment" name="department" placeholder="Sales, IT, HR, etc.">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editPosition">Position</label>
+                        <input type="text" id="editPosition" name="position" placeholder="Manager, Developer, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label for="editHireDate">Hire Date</label>
+                        <input type="date" id="editHireDate" name="hire_date">
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editUserModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Calendar Event</h3>
+                <button class="modal-close" onclick="closeModal('addEventModal')">&times;</button>
+            </div>
+            <form id="addEventForm">
+                <div class="form-group">
+                    <label for="eventTitle">Event Title</label>
+                    <input type="text" id="eventTitle" name="title" required placeholder="Meeting, Holiday, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="eventDate">Event Date</label>
+                    <input type="date" id="eventDate" name="event_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventType">Event Type</label>
+                    <select id="eventType" name="event_type" required>
+                        <option value="holiday">Holiday</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="training">Training</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="eventDescription">Description</label>
+                    <textarea id="eventDescription" name="description" rows="3" placeholder="Event details (optional)"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addEventModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
