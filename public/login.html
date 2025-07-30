@@ -20,7 +20,7 @@
                 <div class="form-group">
                     <div class="input-wrapper">
                         <i class="fas fa-user"></i>
-                        <input type="text" id="username" name="username" placeholder="Username or Email" required autocomplete="username" tabindex="1">
+                        <input type="text" id="username" name="username" placeholder="Account ID" required autocomplete="username" tabindex="1" autofocus>
                     </div>
                 </div>
                 
@@ -41,6 +41,20 @@
             </form>
             
             <div id="errorMessage" class="error-message" style="display: none;"></div>
+            
+            <div id="serverStatus" class="server-status" style="display: none;">
+                <div class="status-indicator">
+                    <span id="statusIcon">🔴</span>
+                    <span id="statusText">Checking server...</span>
+                </div>
+                <div id="serverInstructions" class="server-instructions" style="display: none;">
+                    <p><strong>Server is not running!</strong></p>
+                    <p>1. Open Terminal (Ctrl+Shift+`)</p>
+                    <p>2. Run: <code>node server.js</code></p>
+                    <p>3. Look for: "Server running on port 3000"</p>
+                    <p>4. Keep terminal open and try login again</p>
+                </div>
+            </div>
             
             <div class="login-footer">
                 <p>Demo Credentials:</p>
