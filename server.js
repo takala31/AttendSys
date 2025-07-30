@@ -23,7 +23,8 @@ const PORT = process.env.PORT || 3000;
 
 // Security middleware
 app.use(helmet({
-    contentSecurityPolicy: false, // Disable for development
+    contentSecurityPolicy: false, // Disable for development and Railway
+    crossOriginEmbedderPolicy: false // Allow Railway deployment
 }));
 
 // Rate limiting
@@ -33,9 +34,22 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS
+// CORS - Allow Railway domain and development
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' ? 'your-domain.com' : 'http://localhost:3000',
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // Allow Railway domains and localhost
+        if (origin.includes('railway.app') || 
+            origin.includes('localhost') || 
+            origin.includes('127.0.0.1')) {
+            return callback(null, true);
+        }
+        
+        // For production, you can add your custom domain here
+        return callback(null, true); // Allow all for now
+    },
     credentials: true
 }));
 
